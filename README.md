@@ -1,36 +1,32 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## Description
 
-## Getting Started
+When using Next.js App Router, a specific combination of Server and Client Components with Context Providers and global CSS causes rendering issues. The server appears to hang and fails to re-render beyond the initial render.
 
-First, run the development server:
+The problematic setup involves:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. A Server Component (`layout.tsx`) that imports global CSS (which is default from the create-next-app cli command) and renders a Client Component (`Providers`).
+2. The `Providers` component wraps the children with a Context Provider.
+3. A Client Component (`page.tsx`) is rendered as a child of the `Providers` component.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+This configuration causes the Next.js server to become unresponsive, preventing subsequent re-renders and updates to the page.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Steps to Reproduce
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+1. Run `pnpm i`
+2. Run `pnpm dev`
+3. Visit localhost:3000, see console logs not display on the client browser console.
 
-## Learn More
+Caveat: Issue will reproduce intermittently, to repro successfully, restart the Next.js server.
 
-To learn more about Next.js, take a look at the following resources:
+## Expected vs Actual Behavior
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Expected: App mounts and re-renders allowing the `TestProvider`'s console log to print client-side.
+- Actual: Server hangs after initial render, blocking further updates
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## Additional Context
 
-## Deploy on Vercel
+This issue seems to be related to the interaction between Server Components, Client Components with Context Providers, and global CSS imports. It persists even when following Next.js best practices for mixing Server and Client Components.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+A minimal reproduction repository has been created to demonstrate this issue.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+This minimal reproduction was inspired by this Vercel guide of using React Context with Next.js: https://vercel.com/guides/react-context-state-management-nextjs
